@@ -25,7 +25,7 @@ def extract_harris(img, sigma = 0.5, k = 0.04, thresh = 1e-5):
     # Do not forget to use the mode "same" to keep the image size unchanged.
     #print("Hello World!")
     #raise NotImplementedError
-    # I_x = I (x + 1, y) - I(x - 1, y) / 2
+        # I_x = I (x + 1, y) - I(x - 1, y) / 2
     # I_y = I (x, y + 1) - I(x, y - 1) / 2
     sobel_x = np.array([[-1, 0, 1],
                         [-2, 0, 2],
@@ -38,7 +38,8 @@ def extract_harris(img, sigma = 0.5, k = 0.04, thresh = 1e-5):
     I_x = signal.convolve2d(img, sobel_x, mode='same')
     I_y = signal.convolve2d(img, sobel_y, mode='same')
     
-    # plt.figure(figsize=(12, 6))
+        # Plot the original image and the convolved images
+    plt.figure(figsize=(12, 6))
 
     # plt.subplot(1, 3, 1)
     # plt.imshow(img, cmap='gray')
@@ -71,9 +72,9 @@ def extract_harris(img, sigma = 0.5, k = 0.04, thresh = 1e-5):
     I_y_2 = I_y * I_y
     I_x_y = I_x * I_y
     
-    I_x_2 = cv2.GaussianBlur(I_x_2, (5, 5), sigma, 0, cv2.BORDER_REPLICATE)
-    I_y_2 = cv2.GaussianBlur(I_y_2, (5, 5), sigma, 0, cv2.BORDER_REPLICATE)
-    I_x_y = cv2.GaussianBlur(I_x_y, (5, 5), sigma, 0, cv2.BORDER_REPLICATE)
+    I_x_2 = cv2.GaussianBlur(I_x_2, (5, 5), sigma, 0)
+    I_y_2 = cv2.GaussianBlur(I_y_2, (5, 5), sigma, 0)
+    I_x_y = cv2.GaussianBlur(I_x_y, (5, 5), sigma, 0)
     
     
     # 4. Compute Harris response function C

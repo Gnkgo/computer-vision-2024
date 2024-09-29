@@ -6,10 +6,19 @@ from functions.extract_harris import extract_harris
 from functions.extract_descriptors import filter_keypoints, extract_patches
 from functions.match_descriptors import match_descriptors
 from functions.vis_utils import plot_image_with_keypoints, plot_image_pair_with_matches
-
+'''
+    Inputs:
+    - img:      (h, w) gray-scaled image
+    - sigma:    smoothing Gaussian sigma. suggested values: 0.5, 1.0, 2.0
+    - k:        Harris response function constant. suggest interval: (0.04 - 0.06)
+    - thresh:   scalar value to threshold corner strength. suggested interval: (1e-6 - 1e-4)
+    Returns:
+    - corners:  (q, 2) numpy array storing the keypoint positions [x, y]
+    - C:     (h, w) numpy array storing the corner strength
+'''
 # constants
 HARRIS_SIGMA = 2.0
-HARRIS_K = 0.04
+HARRIS_K = 0.06
 HARRIS_THRESH = 1e-4
 MATCHING_RATIO_TEST_THRESHOLD = 0.5
 
