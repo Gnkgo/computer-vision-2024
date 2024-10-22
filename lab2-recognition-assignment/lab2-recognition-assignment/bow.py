@@ -47,18 +47,29 @@ def grid_points(img, nPointsX, nPointsY, border):
     image_size_without_border = np.array([w, h]) - 2 * border
 
     cell_size = image_size_without_border / (nPointsX, nPointsY)
-    #:return: vPoints: 2D grid point coordinates, numpy array, [nPointsX*nPointsY, 2]
     vPoints = np.zeros((nPointsX * nPointsY, 2))
 
     #vPoints = None  # numpy array, [nPointsX*nPointsY, 2]
-    for i in range(nPointsX):
-        for j in range(nPointsY):
-            x = i * cell_size[0] + border
-            y = j * cell_size[1] + border
-            vPoints[i * nPointsY + j, 0] = x
-            vPoints[i * nPointsY + j, 1] = y
+    # for i in range(nPointsX):
+    #     for j in range(nPointsY):
+    #         x = i * cell_size[0] + border
+    #         y = j * cell_size[1] + border
+    #         vPoints[i * nPointsY + j, 0] = x
+    #         vPoints[i * nPointsY + j, 1] = y
 
     # TODO
+
+    x_indices = np.arange(nPointsX).reshape(-1, 1)
+    y_indices = np.arange(nPointsY).reshape(1, -1)
+
+    x_coords = x_indices * cell_size[0] + border
+    y_coords = y_indices * cell_size[1] + border
+
+    x_coords = x_coords.flatten()
+    y_coords = y_coords.flatten()
+
+    vPoints[:, 0] = np.tile(x_coords, nPointsY)
+
 
     return vPoints
 
