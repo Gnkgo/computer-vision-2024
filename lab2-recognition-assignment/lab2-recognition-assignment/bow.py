@@ -112,7 +112,7 @@ def descriptors_hog(img, vPoints, cellWidth, cellHeight):
                 # print("grad_x squared slice:", grad_x_squared)
                 # print("grad_y squared slice:", grad_y_squared)
 
-                #gradient_magnitude = np.sqrt(grad_x_squared + grad_y_squared)
+                gradient_magnitude = np.sqrt(grad_x_squared + grad_y_squared)
                 
                 gradient_orientation = np.arctan2(grad_y[start_y:end_y, start_x:end_x], grad_x[start_y:end_y, start_x:end_x])
                 gradient_orientation = np.mod(gradient_orientation, 2 * np.pi)
@@ -123,9 +123,9 @@ def descriptors_hog(img, vPoints, cellWidth, cellHeight):
                 for x in range(gradient_orientation.shape[0]):
                     for y in range(gradient_orientation.shape[1]):
                         angle = gradient_orientation[x, y]
-                        #magnitude = gradient_magnitude[x, y]
+                        magnitude = gradient_magnitude[x, y]
                         bin_idx = int(angle / bin_width)
-                        hist[bin_idx] += 1
+                        hist[bin_idx] += magnitude
 
                 desc.extend(hist)
 
@@ -306,7 +306,7 @@ if __name__ == '__main__':
     nameDirNeg_test = 'data/data_bow/cars-testing-neg'
 
     # number of k-means clusters
-    k = 10 # TODO
+    k = 9 # TODO
     # maximum iteration numbers for k-means clustering
     numiter = 50  # TODO
 
