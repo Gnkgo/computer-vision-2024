@@ -1,3 +1,5 @@
 *.png
 __MACOSX
 data
+.pyc
+__pycache__

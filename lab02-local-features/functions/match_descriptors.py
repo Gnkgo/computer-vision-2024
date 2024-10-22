@@ -51,9 +51,10 @@ def match_descriptors(desc1, desc2, method = "one_way", ratio_thresh=0.5):
     elif method == "ratio":
         nearest_neighbors_indices = np.argmin(distances, axis=1)
         sorted_distances = np.partition(distances, 2, axis=1)
-        nearest_distances = sorted_distances[:, 0]  
-        second_nearest_distances = sorted_distances[:, 1] 
+        nearest_distances = sorted_distances[:, 0]  # The smallest distance per row
+        second_nearest_distances = sorted_distances[:, 1]  # The second smallest distance per row
         ratio = nearest_distances / second_nearest_distances
+        
         good_matches_mask = ratio < ratio_thresh
         
         good_matches_indices = np.arange(q1)[good_matches_mask]

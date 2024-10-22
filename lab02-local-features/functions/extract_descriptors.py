@@ -10,15 +10,20 @@ def filter_keypoints(img, keypoints, patch_size=9):
     Returns:
     - filtered_keypoints: (q', 2) numpy array of filtered keypoint locations [x, y]
     '''
+    # Calculate the half patch size to avoid boundary issues
     half_patch = patch_size // 2
-    h, w = img.shape[:2]
-    filtered_keypoints = []
     
+    # Get the dimensions of the image
+    h, w = img.shape[:2]
+    
+    # Filter out keypoints that are too close to the image boundaries
+    filtered_keypoints = []
     for kp in keypoints:
         x, y = kp
         if x > half_patch and x < (w - half_patch) and y > half_patch and y < (h - half_patch):
             filtered_keypoints.append(kp)
     
+    # Convert back to a numpy array
     filtered_keypoints = np.array(filtered_keypoints)
     
     return filtered_keypoints
