@@ -3,7 +3,6 @@ import cv2
 import glob
 import os
 from sklearn.cluster import KMeans
-from sklearn.impute import SimpleImputer
 from tqdm import tqdm
 
 
@@ -42,28 +41,14 @@ def grid_points(img, nPointsX, nPointsY, border):
     :param border: leave border pixels in each image dimension
     :return: vPoints: 2D grid point coordinates, numpy array, [nPointsX*nPointsY, 2]
     """
-    
-    h, w = img.shape[:2]
-    image_size_without_border = np.array([w, h]) - 2 * border
-
-    cell_size = image_size_without_border / (nPointsX, nPointsY)
-    vPoints = np.zeros((nPointsX * nPointsY, 2))
-
-    #vPoints = None  # numpy array, [nPointsX*nPointsY, 2]
-    for i in range(nPointsX):
-        for j in range(nPointsY):
-            x = i * cell_size[0] + border
-            y = j * cell_size[1] + border
-            vPoints[i * nPointsY + j, 0] = x
-            vPoints[i * nPointsY + j, 1] = y
+    vPoints = None  # numpy array, [nPointsX*nPointsY, 2]
 
     # TODO
-
+    ...
 
     return vPoints
 
 
-#this code was read to understand the implementation of the HOG descriptor https://www.analyticsvidhya.com/blog/2019/09/feature-engineering-images-introduction-hog-feature-descriptor/
 def descriptors_hog(img, vPoints, cellWidth, cellHeight):
     nBins = 8
     w = cellWidth
@@ -73,7 +58,6 @@ def descriptors_hog(img, vPoints, cellWidth, cellHeight):
     grad_y = cv2.Sobel(img, cv2.CV_16S, dx=0, dy=1, ksize=1)
 
     descriptors = []  # list of descriptors for the current image, each entry is one 128-d vector for a grid point
-
     for i in range(len(vPoints)):
         center_x = round(vPoints[i, 0])
         center_y = round(vPoints[i, 1])
@@ -81,74 +65,22 @@ def descriptors_hog(img, vPoints, cellWidth, cellHeight):
         desc = []
         for cell_y in range(-2, 2):
             for cell_x in range(-2, 2):
-                start_y = max(0, center_y + cell_y * h)
-                end_y = min(img.shape[0], center_y + (cell_y + 1) * h)
+                start_y = center_y + (cell_y) * h
+                end_y = center_y + (cell_y + 1) * h
 
-                start_x = max(0, center_x + cell_x * w)
-                end_x = min(img.shape[1], center_x + (cell_x + 1) * w)
-                
+                start_x = center_x + (cell_x) * w
+                end_x = center_x + (cell_x + 1) * w
 
-
-                # Check if the slice is valid before processing
-                #if end_y > start_y and end_x > start_x:
-
-
-                #gradient_orientation = np.arctan2(grad_y[start_y:end_y, start_x:end_x], grad_x[start_y:end_y, start_x:end_x])
-                #gradient_magnitude = np.sqrt(grad_y[start_y:end_y, start_x:end_x] ** 2 + grad_x[start_y:end_y, start_x:end_x] ** 2 )
-
-                # # Check for invalid values in grad_x and grad_y before computing gradient magnitude
-                # if (grad_x[start_y:end_y, start_x:end_x] < 0).any() or np.isinf(grad_x[start_y:end_y, start_x:end_x]).any():
-                #     print("Invalid values in grad_x: contains negative or infinite values")
-                    
-                # if (grad_y[start_y:end_y, start_x:end_x] < 0).any() or np.isinf(grad_y[start_y:end_y, start_x:end_x]).any():
-                #     print("Invalid values in grad_y: contains negative or infinite values")
-
-                # Check for invalid values in the sqrt result
-                # Check for invalid values in grad_x and grad_y
-
-                grad_x_squared = (grad_x[start_y:end_y, start_x:end_x].astype(np.float64) ** 2)
-                grad_y_squared = (grad_y[start_y:end_y, start_x:end_x].astype(np.float64) ** 2)
-
-                # print("grad_x squared slice:", grad_x_squared)
-                # print("grad_y squared slice:", grad_y_squared)
-
-                gradient_magnitude = np.sqrt(grad_x_squared + grad_y_squared)
-                
-                gradient_orientation = np.arctan2(grad_y[start_y:end_y, start_x:end_x], grad_x[start_y:end_y, start_x:end_x])
-                gradient_orientation = np.mod(gradient_orientation, 2 * np.pi)
-
-                hist = np.zeros(nBins)
-                bin_width = 2 * np.pi / nBins
-
-                for x in range(gradient_orientation.shape[0]):
-                    for y in range(gradient_orientation.shape[1]):
-                        angle = gradient_orientation[x, y]
-                        magnitude = gradient_magnitude[x, y]
-                        bin_idx = int(angle / bin_width)
-                        hist[bin_idx] += magnitude
-
-                desc.extend(hist)
-
-        desc = np.array(desc)
-        desc /= np.linalg.norm(desc) 
+                # TODO
+                # compute the angles
+                # compute the histogram
+                ...
 
         descriptors.append(desc)
-        
 
+    # [nPointsX*nPointsY, 128], descriptor for the current image (100 grid points)
     descriptors = np.asarray(descriptors)
-
-    # if np.isnan(img).any():
-    #         print("NaN values detected in the input image")
-    # if np.isinf(img).any():
-    #         print("Inf values detected in the input image")
-            
-    # if np.isnan(grad_x).any() or np.isnan(grad_y).any():
-    #     print("NaN values detected in the gradients")
-    # if np.isinf(grad_x).any() or np.isinf(grad_y).any():
-    #     print("Inf values detected in the gradients")
-    
     return descriptors
-
 
 
 def create_codebook(nameDirPos, nameDirNeg, k, numiter):
@@ -175,25 +107,23 @@ def create_codebook(nameDirPos, nameDirNeg, k, numiter):
     vFeatures = []
     # Extract features for all image
     for i in tqdm(range(nImgs)):
-        #print('processing image {} ...'.format(i+1))
+        # print('processing image {} ...'.format(i+1))
         img = cv2.imread(vImgNames[i])  # [h, w, 3]
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # [h, w]
 
         # Collect local feature points for each image, and compute a descriptor for each local feature point
         # TODO start
-        
         vPoints = grid_points(img, nPointsX, nPointsY, border)
-        
         # [100, 128]
         features = descriptors_hog(img, vPoints, cellWidth, cellHeight)
         # all features from one image [n_vPoints, 128] (100 grid points)
         vFeatures.append(features)
         # TODO end
+
     vFeatures = np.asarray(vFeatures)  # [n_imgs, n_vPoints, 128]
     # [n_imgs*n_vPoints, 128]
     vFeatures = vFeatures.reshape(-1, vFeatures.shape[-1])
     print('number of extracted features: ', len(vFeatures))
-    
 
     # Cluster the features using K-Means
     print('clustering ...')
@@ -207,19 +137,10 @@ def bow_histogram(vFeatures, vCenters):
     :param vFeatures: MxD matrix containing M feature vectors of dim. D
     :param vCenters: NxD matrix containing N cluster centers of dim. D
     :return: histo: N-dim. numpy vector containing the resulting BoW activation histogram.
-    """ 
-    histo = np.zeros(vCenters.shape[0])  # [k]
-    # Assign each feature to the closest cluster center
-    # and create the histogram
-    Idx, _ = findnn(vFeatures, vCenters)
-    for idx in Idx:
-        histo[idx] += 1
-    histo /= np.linalg.norm(histo) + 1e-6
-    
-    print ("histo", histo)
+    """
+    histo = None
+
     # TODO
-    
-    
     ...
 
     return histo
@@ -247,26 +168,12 @@ def create_bow_histograms(nameDir, vCenters):
         img = cv2.imread(vImgNames[i])  # [h, w, 3]
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # [h, w]
 
-        # Collect local feature points for each image, and compute a descriptor for each local feature point
-        vPoints = grid_points(img, nPointsX, nPointsY, border)
-        vFeatures = descriptors_hog(img, vPoints, cellWidth, cellHeight)
-        # [n_vPoints, 128]
-        # Compute the bag-of-words histogram for the current image
-        vBow_current = np.zeros(vCenters.shape[0])  # [k]
-        
-        # Assign each feature to the closest cluster center
-        Idx, _ = findnn(vFeatures, vCenters)
-        for idx in Idx:
-            vBow_current[idx] += 1
-
-        # Normalize the histogram
-        vBow_current /= (np.linalg.norm(vBow_current) + 1e-6)
-        
-        # Append the current histogram to the list of histograms
-        vBoW.append(vBow_current)
+        # TODO
+        ...
 
     vBoW = np.asarray(vBoW)  # [n_imgs, k]
     return vBoW
+
 
 def bow_recognition_nearest(histogram, vBoWPos, vBoWNeg):
     """
@@ -281,13 +188,6 @@ def bow_recognition_nearest(histogram, vBoWPos, vBoWNeg):
     # Find the nearest neighbor in the positive and negative sets and decide based on this neighbor
     # TODO
     ...
-    vfeatures = np.array(histogram)
-    
-    IdxPos, DistPos = findnn(vfeatures, vBoWPos)
-    IdxNeg, DistNeg = findnn(vfeatures, vBoWNeg)
-    
-       
-    
 
     if (DistPos < DistNeg):
         sLabel = 1
@@ -306,9 +206,9 @@ if __name__ == '__main__':
     nameDirNeg_test = 'data/data_bow/cars-testing-neg'
 
     # number of k-means clusters
-    k = 9 # TODO
+    k = None  # TODO
     # maximum iteration numbers for k-means clustering
-    numiter = 50  # TODO
+    numiter = None  # TODO
 
     print('creating codebook ...')
     vCenters = create_codebook(nameDirPos_train, nameDirNeg_train, k, numiter)

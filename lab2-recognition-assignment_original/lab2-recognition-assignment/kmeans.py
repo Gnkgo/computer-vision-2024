@@ -13,24 +13,21 @@ image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 # Reshape the image into a 2D array of pixels
 pixel_values = image_rgb.reshape((-1, 3))
 pixel_values = np.float32(pixel_values)
-print("pixel_values.shape", pixel_values.shape)
-print("First 5 pixel_values", pixel_values[:5])
 
 # Define the number of clusters (K)
 # TODO: try 2, 3, 5, 8, 10 etc.
-K = 2 # Set the number of clusters
+K = 3  # Set the number of clusters
 
 # Randomly initialize the centroids
 # Random select K elements from pixel_values as the initial centroids
-centroids = pixel_values[np.random.choice(pixel_values.shape[0], K, replace=False)]
-print("centroids.shape", centroids.shape)
-print("centroids", centroids)
- # TODO
+centroids = None  # TODO
 
 
 # Define a function to calculate the Euclidean distance between two points
 def euclidean_distance(a, b):
-    return np.sqrt(np.sum((a - b) ** 2)) #TODO
+    # Return the Euclidean distance between two points
+    return None  # TODO
+
 
 # Define the K-means algorithm
 def kmeans(pixel_values, centroids, max_iterations=50):
@@ -39,24 +36,21 @@ def kmeans(pixel_values, centroids, max_iterations=50):
         labels = np.zeros(pixel_values.shape[0], dtype=np.int32)
         for idx, pixel in enumerate(pixel_values):
             # Calculate the distances to the centroids
-            distances = np.zeros(K)
-            for k in range(K):
-                distances[k] = euclidean_distance(centroids[k], pixel)
+            distances = None  # TODO
             # Assign the index of the nearest centroid
-            labels[idx] = np.argmin(distances)
+            labels[idx] = None  # TODO
 
         # Recalculate the centroids
         new_centroids = np.zeros_like(centroids)
         for k in range(K):
             # Get the cluster_points
-            cluster_points = pixel_values[labels == k]  # TODO
+            cluster_points = None  # TODO
             # Calculate the new centroids based on the mean of the assigned cluster_points
-            if len(cluster_points) > 0:
-                new_centroids[k] = np.mean(cluster_points, axis=0)  # TODO
+            new_centroids[k] = None  # TODO
 
         # Check for convergence
         # Stop when centroids no longer change
-        if np.all(centroids == new_centroids):
+        if True:  # TODO
             break
 
         centroids = new_centroids
