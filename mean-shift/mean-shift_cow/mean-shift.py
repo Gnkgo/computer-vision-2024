@@ -59,8 +59,9 @@ scale = 0.25    # downscale the image to run faster
 #Elapsed time for mean-shift: 1.7505228519439697
 
 #GPU
-# Elapsed time for mean-shift: 0.6701879501342773
 # Elapsed time for mean-shift: 3.3482234477996826
+# Elapsed time for mean-shift: 0.6701879501342773
+
 # Load image and convert it to CIELAB space
 image = rescale(io.imread('cow.jpg'), scale, channel_axis=-1)
 image_lab = color.rgb2lab(image)

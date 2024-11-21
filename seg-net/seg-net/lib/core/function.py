@@ -34,10 +34,14 @@ def train(train_loader, model, criterion, optimizer, epoch,
     losses = AverageMeter()
 
     # switch to train mode
+    
     model.train()
 
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
+        if (args.gpu):
+            input = input.cuda()
+            target = target.cuda()
         if len(input.shape) > 4:
             # Note that in the MNIST dataloader, we return 3-dimentional tensor before we make the batch,
             # thus the batch of images returned from the dataloader would be 1 x B x 3 x H x W. Same applies
@@ -52,6 +56,9 @@ def train(train_loader, model, criterion, optimizer, epoch,
         output = model(input)
 
         # compute loss
+        
+
+
         target = target.to(output.device)
         loss = criterion(output, target)
 
@@ -112,8 +119,12 @@ def validate(val_loader, val_dataset, model, criterion,
     all_gts = []
 
     with torch.no_grad():
+        
         end = time.time()
         for i, (input, target) in enumerate(val_loader):
+            if (args.gpu):
+                input = input.cuda()
+                target = target.cuda()
             if len(input.shape) > 4:
                 # Note that in the MNIST dataloader, we return 3-dimentional tensor before we make the batch,
                 # thus the batch of images returned from the dataloader would be 1 x B x 3 x H x W. Same applies
@@ -226,3 +237,4 @@ class AverageMeter(object):
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count if self.count != 0 else 0
+
