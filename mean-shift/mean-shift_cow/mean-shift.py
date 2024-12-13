@@ -33,6 +33,7 @@ def update_point_batch(weight, X):
     new_points = weighted_sum / torch.sum(weight, dim=1, keepdim=True)  # (N, D)
 
     return new_points
+
 def meanshift_step(X, bandwidth=2.5):
     X_ = X.clone()
     for i, x in enumerate(X):
