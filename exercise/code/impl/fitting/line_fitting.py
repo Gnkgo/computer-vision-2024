@@ -9,15 +9,25 @@ def least_square(x,y):
 	# TODO
 	# return the least-squares solution
 	# you can use np.linalg.lstsq
+	least_squares = np.linalg.lstsq(np.vstack([x, np.ones(len(x))]).T, y, rcond=None)
+	k, b = least_squares[0]
 	return k, b
 
 def num_inlier(x,y,k,b,n_samples,thres_dist):
 	# TODO
 	# compute the number of inliers and a mask that denotes the indices of inliers
+	
 	num = 0
 	mask = np.zeros(x.shape, dtype=bool)
 
+	for i in range(len(x)):
+		distance = abs(y[i] - (k * x[i] + b)) / np.sqrt(k**2 + 1)
+		if distance < thres_dist:
+			num += 1
+			mask[i] = True
 	return num, mask
+
+
 
 def ransac(x,y,iter,n_samples,thres_dist,num_subset):
 	# TODO
@@ -26,8 +36,26 @@ def ransac(x,y,iter,n_samples,thres_dist,num_subset):
 	b_ransac = None
 	inlier_mask = None
 	best_inliers = 0
+ 
+	for i in range(iter):
+		# Randomly sample num_subset points
+		sample_indices = random.sample(range(n_samples), num_subset)
+		x_sample = x[sample_indices]
+		y_sample = y[sample_indices]
+		# Fit a line to the sampled points
+		k, b = least_square(x_sample, y_sample)
+		# Count the number of inliers
+		num, mask = num_inlier(x, y, k, b, n_samples, thres_dist)
+		if num > best_inliers:
+			best_inliers = num
+			k_ransac = k
+			b_ransac = b
+			inlier_mask = mask
+ 
 
 	return k_ransac, b_ransac, inlier_mask
+
+
 
 def main():
 	iter = 300
