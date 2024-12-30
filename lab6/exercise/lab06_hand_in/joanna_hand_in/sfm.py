@@ -45,25 +45,26 @@ def main():
   # Visualize images and features
   # You can comment these lines once you verified that the images are loaded correctly
 
-  # Show the images
-  #PlotImages(images)
-  print(":)")
-  # Show the keypoints
+  # # Show the images
+  # PlotImages(images)
+
+  # # Show the keypoints
   # for image_name in image_names:
   #   PlotWithKeypoints(images[image_name])
-  print(":))")
-  # Show the feature matches
-  #for image_pair in itertools.combinations(image_names, 2):
-  #  PlotImagePairMatches(images[image_pair[0]], images[image_pair[1]], matches[(image_pair[0], image_pair[1])])
-  #  gc.collect()
+
+  # # # Show the feature matches
+  # for image_pair in itertools.combinations(image_names, 2):
+  #   PlotImagePairMatches(images[image_pair[0]], images[image_pair[1]], matches[(image_pair[0], image_pair[1])])
+  #   gc.collect()
   # ------------------------------------------------------------------------------------
-  print(":)))")
+  
   e_im1_name = image_names[init_images[0]]
   e_im2_name = image_names[init_images[1]]
   e_im1 = images[e_im1_name]
   e_im2 = images[e_im2_name]
+  print(f'Estimating pose between {e_im1_name} and {e_im2_name}')
   e_matches = GetPairMatches(e_im1_name, e_im2_name, matches)
-
+  print(f'Found {e_matches.shape[0]} matches')
   # TODO Estimate relative pose of first pair
   # Estimate Fundamental matrix
   E = EstimateEssentialMatrix(K, e_im1, e_im2, e_matches)
@@ -72,7 +73,7 @@ def main():
   # This gives four possible solutions and we need to check which one is the correct one in the next step
   possible_relative_poses = DecomposeEssentialMatrix(E)
 
-  print(":))))")
+
   # ------------------Finding the correct decomposition--------------------------------------
   # For each possible relative pose, try to triangulate points with function TriangulatePoints.
   # We can assume that the correct solution is the one that gives the most points in front of both cameras.
@@ -82,24 +83,24 @@ def main():
   # you can set the image poses in the images (image.SetPose(...))
   # Note that this pose is assumed to be the transformation from global space to image space
   # TODO
+  # Iterate through all possible relative poses
   for i, (R, t) in enumerate(possible_relative_poses):
-    e_im1.SetPose(np.identity(3), np.zeros(3))
-    e_im2.SetPose(R.T, -1 * R.T @ t)
+      e_im1.SetPose(np.eye(3), np.zeros(3))
+      e_im2.SetPose(R, t)
 
-    points, _, _ = TriangulatePoints(K, e_im1, e_im2, e_matches)
-    num_valid_points = points.shape[0]
+      points3D, _, _ = TriangulatePoints(K, e_im1, e_im2, e_matches)
+      num_points_in_front = points3D.shape[0]
 
-    if num_valid_points > max_points:
-      max_points = num_valid_points
-      best_pose = i
-  print(":))))")
+      if num_points_in_front > max_points:
+          max_points = num_points_in_front
+          best_pose = i
+
   # TODO
   # Set the image poses in the images (image.SetPose(...))
   # Note that the pose is assumed to be the transformation from global space to image space
   R, t = possible_relative_poses[best_pose]
-  e_im1.SetPose(np.identity(3), np.zeros(3))
-  e_im2.SetPose(R.T, -1 * R.T @ t)
-
+  e_im1.SetPose(np.eye(3), np.zeros(3))  
+  e_im2.SetPose(R, t)                  
 
   # Triangulate initial points
   points3D, im1_corrs, im2_corrs = TriangulatePoints(K, e_im1, e_im2, e_matches)
@@ -110,19 +111,18 @@ def main():
 
   # Keep track of all registered images
   registered_images = [e_im1_name, e_im2_name]
-  print(":)))))")
+
   for reg_im in registered_images:
     print(f'Image {reg_im} sees {images[reg_im].NumObserved()} 3D points')
-  print(":))))))")
+
   # ------------------Map extension--------------------------------------
   # Register new images + triangulate
   # Run until we can register all images
   while len(registered_images) < len(images):
-    print("1")
     for image_name in images:
       if image_name in registered_images:
         continue
-      print("2")
+
       # Find 2D-3D correspondences
       image_kp_idxs, point3D_idxs = Find2D3DCorrespondences(image_name, images, matches, registered_images)
 
@@ -130,7 +130,7 @@ def main():
       # Keep this image for later
       if len(image_kp_idxs) < 50:
         continue
-      print("3")
+
       print(f'Register image {image_name} from {len(image_kp_idxs)} correspondences')
 
       # Estimate new image pose
@@ -139,7 +139,6 @@ def main():
       # Set the estimated image pose in the image and add the correspondences between keypoints and 3D points
       images[image_name].SetPose(R, t)
       images[image_name].Add3DCorrs(image_kp_idxs, point3D_idxs)
-
 
       # TODO
       # Triangulate new points wth all previously registered images
@@ -151,8 +150,7 @@ def main():
 
       registered_images.append(image_name)
 
-  print("4")
-  print("done")
+
   # Visualize
   fig = plt.figure()
   ax3d = fig.add_subplot(111, projection='3d')
@@ -162,7 +160,6 @@ def main():
   # Delay termination of the program until the figures are closed
   # Otherwise all figure windows will be killed with the program
   plt.show(block=True)
-
 
 
 if __name__ == '__main__':
